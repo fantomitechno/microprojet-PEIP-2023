@@ -1,0 +1,1 @@
+http://blancosilva.github.io/post/2014/10/28/Computational-Geometry-in-Python.html
