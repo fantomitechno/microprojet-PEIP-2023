@@ -21,7 +21,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-from typing import List
+from typing import List, Tuple
 from time import time
 
 import sympy.geometry as sg
@@ -58,6 +58,11 @@ def generate_triangles(area_min: int = 1, area_max: int = 30) -> List[sg.Triangl
   print(f"{len(triangles)} triangles générés")
   return triangles
 
+def get_equation(a: sg.Point2D, b: sg.Point2D) -> Tuple[int, int]:
+  """
+  Get the equation of the line passing through two points
+  """
+  
 
 def cut(triangle: sg.Triangle, A: int = 0, B: int = 1) -> List[sg.Triangle]:
   """
