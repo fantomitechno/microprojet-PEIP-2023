@@ -58,14 +58,16 @@ def generate_triangles(area_min: int = 1, area_max: int = 30) -> List[sg.Triangl
   print(f"{len(triangles)} triangles générés")
   return triangles
 
-def first_cut(triangles: List[sg.Triangle]):
-  #for triangle in triangles:
-    side: sg.Segment2D = triangles[0].sides[1]
 
-    print(side)
+def cut(triangle: sg.Triangle, A: int = 0, B: int = 1) -> List[sg.Triangle]:
+  """
+  Cut a triangle in two
+  """
 
 if __name__ == "__main__":
   start = time()
-  triangles = generate_triangles(area_max=2)
-  first_cut(triangles)
+  triangles = generate_triangles(area_max=30)
+  solutions = []
+  for triangle in triangles:
+    cut(triangle)
   print(f"Temps d'éxecution : {time() - start}s")
