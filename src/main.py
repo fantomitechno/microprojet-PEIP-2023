@@ -51,7 +51,7 @@ def generate_triangles(area_min: int = 1, area_max: int = 30) -> List[sg.Triangl
     for index, base in enumerate(bases):
     # index = 0
     # base = bases[index]
-      for jndex in range(int(base) + 1):
+      for jndex in range(round(base/2) + 1):
         triangles.append(sg.Triangle(sg.Point(0, 0), sg.Point(base, 0), sg.Point(jndex, heights[index])))
       # for triangle in triangles:
       #   print(triangle.area)
