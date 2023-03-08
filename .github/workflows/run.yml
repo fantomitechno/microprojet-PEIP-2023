@@ -15,7 +15,7 @@ jobs:
         with:
           python-version: '3.9'
       - name: pip
-        run: pip install sympy
+        run: pip install sympy requests
       - name: run
         run: python src/main.py
       - name: Commit changes
