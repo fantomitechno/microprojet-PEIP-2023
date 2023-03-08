@@ -51,11 +51,14 @@ def generate_triangles(area_min: int = 1, area_max: int = 30) -> List[sg.Triangl
   print(f"{len(triangles)} triangles générés")
   return triangles
 
-def get_equation(a: sg.Point2D, b: sg.Point2D) -> Tuple[int, int]:
+def get_equation(first: sg.Point2D, second: sg.Point2D) -> Tuple[int, int]:
   """
   Get the equation of the line passing through two points
+  Return (a, b) with y = ax + b
   """
-  
+  a = (second.y - first.y) / (second.x - first.x)
+  b = first.y - a * first.x
+  return a, b
 
 def cut(triangle: sg.Triangle, A: int = 0, B: int = 1) -> List[sg.Triangle]:
   """
