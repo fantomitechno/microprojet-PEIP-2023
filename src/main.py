@@ -60,15 +60,25 @@ def get_equation(first: sg.Point2D, second: sg.Point2D) -> Tuple[int, int]:
   b = first.y - a * first.x
   return a, b
 
-def cut(triangle: sg.Triangle, A: int = 0, B: int = 1) -> List[sg.Triangle]:
+def cut(triangle: sg.Triangle, A: int = 0, B: int = 2) -> List[sg.Triangle]:
   """
   Cut a triangle in two
   """
+  if triangle.area < 2:
+    return []
+  triangles = []
+  a, b = get_equation(triangle.vertices[A], triangle.vertices[B])
+  for area in range(2, triangle.area - 2):
+    height = 2*area/triangle.base
+    x = (height - b)/a
+    triangles.append(sg.Triangle(triangle.vertices[0], triangle.vertices[1], sg.Point(x, height)))
+  return triangles
 
 if __name__ == "__main__":
   start = time()
   triangles = generate_triangles(area_max=30)
   solutions = []
   for triangle in triangles:
-    cut(triangle)
+    first_cut = cut(triangle, 0, 2)
+    second_cut = cut(triangle, 1, 2)
   print(f"Temps d'éxecution : {time() - start}s")
