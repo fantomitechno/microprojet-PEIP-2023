@@ -13,7 +13,8 @@ jobs:
         uses: actions/setup-python@v4.5.0
         with:
           python-version: '3.9'
-          cache: 'pip' # caching pip dependencies
+      - name: pip
+        run: pip install sympy
       - name: run
         run: python src/main.py
       - name: Commit changes
