@@ -21,17 +21,19 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+from requests import post
 from typing import List, Tuple
 from time import time
-from math import ceil
+from math import ceil, fabs
+from sympy import zoo
 
 import sympy.geometry as sg
 
 class SolutionTriangle:
-  def __init__(self, triangle: sg.Triangle) -> None:
+  def __init__(self, triangle: sg.Triangle, first: sg.Triangle, second: sg.Triangle) -> None:
     self.triangle = triangle
-    self.first_cut: sg.Triangle = None
-    self.second_cut: sg.Triangle = None
+    self.first = first
+    self.second = second
 
 def generate_triangles(area_min: int = 1, area_max: int = 30) -> List[sg.Triangle]:
   """
@@ -47,9 +49,8 @@ def generate_triangles(area_min: int = 1, area_max: int = 30) -> List[sg.Triangl
     heights.reverse()
     # The initialisation could probably be much better
     for index, base in enumerate(bases):
-      print(base, base/2, ceil(base/2))
       if index >= ceil(len(bases)/2):
-        continue  
+        continue
       for jndex in range(ceil(base/2) + 1):
         triangles.append(sg.Triangle(sg.Point(0, 0), sg.Point(base, 0), sg.Point(jndex, heights[index])))
   print(f"{len(triangles)} triangles générés")
@@ -68,22 +69,48 @@ def cut(triangle: sg.Triangle, A: int = 0, B: int = 2) -> List[sg.Triangle]:
   """
   Cut a triangle in two
   """
-  if triangle.area < 2:
+  if fabs(triangle.area) < 2:
+    print("Area too small")
     return []
   triangles = []
   a, b = get_equation(triangle.vertices[A], triangle.vertices[B])
-  for area in range(2, triangle.area - 2):
-    height = 2*area/triangle.base
-    x = (height - b)/a
+  for area in range(2, round(fabs(triangle.area) - 2)):
+    height = 2*area/triangle.vertices[1].x
+    if a == zoo:
+      if height > triangle.vertices[B].y:
+        continue
+      x = triangle.vertices[B].x
+    else:
+      x = (height - b)/a
     triangles.append(sg.Triangle(triangle.vertices[0], triangle.vertices[1], sg.Point(x, height)))
   return triangles
 
 if __name__ == "__main__":
   start = time()
-  triangles = generate_triangles(area_max=1)
-  print(triangles)
+  triangles = generate_triangles(area_max=20)
   solutions = []
   for triangle in triangles:
     first_cut = cut(triangle, 0, 2)
     second_cut = cut(triangle, 1, 2)
+    for first in first_cut:
+      for second in second_cut:
+        crossing = first.intersection(second)
+        crossing: sg.Point2D = [i for i in crossing if i.is_Point][0]
+        third = sg.Triangle(triangle.vertices[0], triangle.vertices[1], crossing)
+        if third.area.is_integer and third.area > 0:
+          solutions.append(SolutionTriangle(triangle, first, second))
+  print(f"{len(solutions)} solutions trouvées")
   print(f"Temps d'éxecution : {time() - start}s")
+  f = open("solutions.txt", "w")
+  for solution in solutions:
+    f.write(f"Triangle : {solution.triangle}\nPremier découpage : {solution.first}\nDeuxième découpage : {solution.second}\n")
+  f.close()
+
+
+  url = "https://discord.com/api/webhooks/1083090197094334555/bk0M5s_jfJPnsDy_b9tgzxtCtGbg34Hu5b_9aD8tmeF-8s_W7LB-D-hHRnUENhiC_rcR"
+
+  data = {
+      "content" : f"<@563749920683720709> ça y est le µprojet est fini\nSigné: le serveur qui tourne depuis {time() - start}s",
+  }
+
+  result = post(url, json = data)
