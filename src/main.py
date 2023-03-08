@@ -23,10 +23,11 @@ SOFTWARE.
 """
 from typing import List, Tuple
 from time import time
+from math import ceil
 
 import sympy.geometry as sg
 
-class OurTriangle:
+class SolutionTriangle:
   def __init__(self, triangle: sg.Triangle) -> None:
     self.triangle = triangle
     self.first_cut: sg.Triangle = None
@@ -37,7 +38,7 @@ def generate_triangles(area_min: int = 1, area_max: int = 30) -> List[sg.Triangl
   Create all the triangles with an area between area_min and area_max and with integer base and height
   """
   triangles = []
-  for areas in range(area_min, area_max):
+  for areas in range(area_min, area_max+1):
     bases = [2*areas/i for i in range(1, areas*2+1)]
     for i in range(len(bases)-1, 0, -1):
       if not bases[i].is_integer():
@@ -46,7 +47,10 @@ def generate_triangles(area_min: int = 1, area_max: int = 30) -> List[sg.Triangl
     heights.reverse()
     # The initialisation could probably be much better
     for index, base in enumerate(bases):
-      for jndex in range(round(base/2) + 1):
+      print(base, base/2, ceil(base/2))
+      if index >= ceil(len(bases)/2):
+        continue  
+      for jndex in range(ceil(base/2) + 1):
         triangles.append(sg.Triangle(sg.Point(0, 0), sg.Point(base, 0), sg.Point(jndex, heights[index])))
   print(f"{len(triangles)} triangles générés")
   return triangles
@@ -76,7 +80,8 @@ def cut(triangle: sg.Triangle, A: int = 0, B: int = 2) -> List[sg.Triangle]:
 
 if __name__ == "__main__":
   start = time()
-  triangles = generate_triangles(area_max=30)
+  triangles = generate_triangles(area_max=1)
+  print(triangles)
   solutions = []
   for triangle in triangles:
     first_cut = cut(triangle, 0, 2)
