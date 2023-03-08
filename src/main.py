@@ -38,7 +38,6 @@ def generate_triangles(area_min: int = 1, area_max: int = 30) -> List[sg.Triangl
   """
   triangles = []
   for areas in range(area_min, area_max):
-    # areas = 30
     bases = [2*areas/i for i in range(1, areas*2+1)]
     for i in range(len(bases)-1, 0, -1):
       if not bases[i].is_integer():
@@ -46,15 +45,9 @@ def generate_triangles(area_min: int = 1, area_max: int = 30) -> List[sg.Triangl
     heights = bases.copy()
     heights.reverse()
     # The initialisation could probably be much better
-    # print(bases)
-    # print(heights)
     for index, base in enumerate(bases):
-    # index = 0
-    # base = bases[index]
       for jndex in range(round(base/2) + 1):
         triangles.append(sg.Triangle(sg.Point(0, 0), sg.Point(base, 0), sg.Point(jndex, heights[index])))
-      # for triangle in triangles:
-      #   print(triangle.area)
   print(f"{len(triangles)} triangles générés")
   return triangles
 
