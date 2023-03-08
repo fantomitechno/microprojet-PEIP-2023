@@ -1,0 +1,29 @@
+name: build
+on: [pull_request, push]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-20.04]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Setup Python
+        uses: actions/setup-python@v4.5.0
+        with:
+          python-version: '3.9'
+          cache: 'pip' # caching pip dependencies
+      - name: pip
+        run: pip install sympy
+      - name: run
+        run: python src/main.py
+      - name: Commit changes
+        run: |
+          git config --global user.email "fantomitechno@gmail.com"
+          git config --global user.name "fantomitechno"
+          git add .
+          git commit -m ":D"
+          git push origin master
+
+
