@@ -105,12 +105,3 @@ if __name__ == "__main__":
   for solution in solutions:
     f.write(f"Triangle : {solution.triangle}\nPremier découpage : {solution.first}\nDeuxième découpage : {solution.second}\n")
   f.close()
-
-
-  url = "https://discord.com/api/webhooks/1083090197094334555/bk0M5s_jfJPnsDy_b9tgzxtCtGbg34Hu5b_9aD8tmeF-8s_W7LB-D-hHRnUENhiC_rcR"
-
-  data = {
-      "content" : f"<@563749920683720709> ça y est le µprojet est fini\nSigné: le serveur qui tourne depuis {time() - start}s",
-  }
-
-  result = post(url, json = data)
