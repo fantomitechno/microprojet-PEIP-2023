@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 from requests import post
-from typing import List, Tuple
+from typing import AbstractSet, Tuple
 from time import time
 from math import ceil, fabs
 from sympy import zoo
@@ -36,11 +36,11 @@ class SolutionTriangle:
     self.second = second
     self.third = third
 
-def generate_triangles(area_min: int = 1, area_max: int = 30, step: int = 1) -> List[sg.Triangle]:
+def generate_triangles(area_min: int = 1, area_max: int = 30, step: int = 1) -> AbstractSet[sg.Triangle]:
   """
   Create all the triangles with an area between area_min and area_max and with integer base and height
   """
-  triangles = []
+  triangles = set()
   for areas in range(area_min, area_max+1):
     bases = [2*areas/i for i in range(1, areas*2+1)]
     for i in range(len(bases)-1, 0, -1):
@@ -53,7 +53,7 @@ def generate_triangles(area_min: int = 1, area_max: int = 30, step: int = 1) -> 
       if index >= ceil(len(bases)/2):
         continue
       for jndex in range(0, round((ceil(base/2)*(1/step) + 1))):
-        triangles.append(sg.Triangle(sg.Point(0, 0), sg.Point(base, 0), sg.Point(jndex*step, heights[index])))
+        triangles.add(sg.Triangle(sg.Point(0, 0), sg.Point(base, 0), sg.Point(jndex*step, heights[index])))
   print(f"{len(triangles)} triangles générés")
   return triangles
 
@@ -66,15 +66,15 @@ def get_equation(first: sg.Point2D, second: sg.Point2D) -> Tuple[int, int]:
   b = first.y - a * first.x
   return a, b
 
-def cut(triangle: sg.Triangle, A: int = 0, B: int = 2, step: int = 1) -> List[sg.Triangle]:
+def cut(triangle: sg.Triangle, A: int = 0, B: int = 2, step: int = 1) -> AbstractSet[sg.Triangle]:
   """
   Cut a triangle in two
   """
   if fabs(triangle.area) < 2:
     print("Area too small")
-    return []
+    return set()
 
-  triangles = []
+  triangles = set()
   a, b = get_equation(triangle.vertices[A], triangle.vertices[B])
 
   for area in range(2, round((fabs(triangle.area) - 2)*(1/step))):
@@ -86,25 +86,25 @@ def cut(triangle: sg.Triangle, A: int = 0, B: int = 2, step: int = 1) -> List[sg
       x = triangle.vertices[B].x
     else:
       x = (height - b)/a
-    triangles.append(sg.Triangle(triangle.vertices[0], triangle.vertices[1], sg.Point(x, height)))
+    triangles.add(sg.Triangle(triangle.vertices[0], triangle.vertices[1], sg.Point(x, height)))
   return triangles
 
-def check_not_solution(solutions: List[SolutionTriangle], area_min: int = 1, area_max: int = 30) -> List[int]:
+def check_not_solution(solutions: AbstractSet[SolutionTriangle], area_min: int = 1, area_max: int = 30) -> AbstractSet[int]:
   """
   Check for no solutions
   """
-  not_solution = []
+  not_solution = set()
   for area in range(area_min, area_max+1):
     if not any([solution.triangle.area == area for solution in solutions]):
-      not_solution.append(area)
+      not_solution.add(area)
   return not_solution
 
 if __name__ == "__main__":
   start = time()
 
-  triangles = generate_triangles(area_max=30, step=1/2)
-  solutions: List[SolutionTriangle] = []
-  raw: List[SolutionTriangle] = []
+  triangles = generate_triangles(step=1/2)
+  solutions: AbstractSet[SolutionTriangle] = set()
+  raw: AbstractSet[SolutionTriangle] = set()
   
   for triangle in triangles:
     first_cut = cut(triangle, 0, 2, step=1/2)
@@ -117,10 +117,10 @@ if __name__ == "__main__":
   
         third = sg.Triangle(triangle.vertices[0], triangle.vertices[1], crossing)
         if third.area.is_integer and third.area != 0:
-          solutions.append(SolutionTriangle(triangle, first, second, third))
-        raw.append(SolutionTriangle(triangle, first, second, third))
+          solutions.add(SolutionTriangle(triangle, first, second, third))
+        raw.add(SolutionTriangle(triangle, first, second, third))
     if not len(first_cut) or not len(second_cut):
-      raw.append(SolutionTriangle(triangle, None, None, None))
+      raw.add(SolutionTriangle(triangle, None, None, None))
         
   
   not_solution = check_not_solution(solutions, area_max=30)
