@@ -72,12 +72,15 @@ def cut(triangle: sg.Triangle, A: int = 0, B: int = 2) -> List[sg.Triangle]:
   if fabs(triangle.area) < 2:
     print("Area too small")
     return []
+
   triangles = []
   a, b = get_equation(triangle.vertices[A], triangle.vertices[B])
+
   for area in range(2, round(fabs(triangle.area) - 2)):
     height = 2*area/triangle.vertices[1].x
-    if a == zoo:
-      if height > triangle.vertices[B].y:
+
+    if a == zoo: # Vertical line (zoo = infinity)
+      if height > triangle.vertices[B].y: # Impossible triangle somehow
         continue
       x = triangle.vertices[B].x
     else:
@@ -99,9 +102,10 @@ if __name__ == "__main__":
         third = sg.Triangle(triangle.vertices[0], triangle.vertices[1], crossing)
         if third.area.is_integer and third.area > 0:
           solutions.append(SolutionTriangle(triangle, first, second))
+  
   print(f"{len(solutions)} solutions trouvées")
   print(f"Temps d'éxecution : {time() - start}s")
   f = open("solutions.txt", "w")
   for solution in solutions:
-    f.write(f"Triangle : {solution.triangle}\nPremier découpage : {solution.first}\nDeuxième découpage : {solution.second}\n")
+    f.write(f"Triangle : {solution.triangle}\nPremier découpage : {solution.first}\nDeuxième découpage : {solution.second}\n\n")
   f.close()
