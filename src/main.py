@@ -88,6 +88,16 @@ def cut(triangle: sg.Triangle, A: int = 0, B: int = 2, step: int = 1) -> List[sg
     triangles.append(sg.Triangle(triangle.vertices[0], triangle.vertices[1], sg.Point(x, height)))
   return triangles
 
+def check_not_solution(solutions: List[SolutionTriangle], area_min: int = 1, area_max: int = 30) -> List[int]:
+  """
+  Check for no solutions
+  """
+  not_solution = []
+  for area in range(area_min, area_max+1):
+    if not any([solution.triangle.area == area for solution in solutions]):
+      not_solution.append(area)
+  return not_solution
+
 if __name__ == "__main__":
   start = time()
 
@@ -107,9 +117,15 @@ if __name__ == "__main__":
         if third.area.is_integer and third.area != 0:
           solutions.append(SolutionTriangle(triangle, first, second, third))
   
+  not_solution = check_not_solution(solutions, area_max=30)
+
   print(f"{len(solutions)} solutions trouvées")
   print(f"Temps d'éxecution : {time() - start}s")
   f = open("solutions.txt", "w")
   for solution in solutions:
     f.write(f"Triangle : {solution.triangle}\nPremier découpage : {solution.first}\nDeuxième découpage : {solution.second}\n\n")
+  f.close()
+  f = open("not_solution.txt", "w")
+  for area in not_solution:
+    f.write(f"{area}, ")
   f.close()
