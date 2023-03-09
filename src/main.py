@@ -42,8 +42,8 @@ def generate_triangles(area_min: int = 1, area_max: int = 30, step: int = 1) -> 
   """
   triangles = []
   for areas in range(area_min, area_max+1):
-    bases = [2*areas/i for i in range(1, areas*2+1, step)]
-    for i in range(len(bases)-1, 0, -step):
+    bases = [2*areas/i for i in range(1, areas*2+1)]
+    for i in range(len(bases)-1, 0, -1):
       if not bases[i].is_integer():
         bases.pop(i)
     heights = bases.copy()
@@ -52,8 +52,8 @@ def generate_triangles(area_min: int = 1, area_max: int = 30, step: int = 1) -> 
     for index, base in enumerate(bases):
       if index >= ceil(len(bases)/2):
         continue
-      for jndex in range(0, ceil(base/2) + 1, step):
-        triangles.append(sg.Triangle(sg.Point(0, 0), sg.Point(base, 0), sg.Point(jndex, heights[index])))
+      for jndex in range(0, round((ceil(base/2)*(1/step) + 1))):
+        triangles.append(sg.Triangle(sg.Point(0, 0), sg.Point(base, 0), sg.Point(jndex*step, heights[index])))
   print(f"{len(triangles)} triangles générés")
   return triangles
 
@@ -77,8 +77,8 @@ def cut(triangle: sg.Triangle, A: int = 0, B: int = 2, step: int = 1) -> List[sg
   triangles = []
   a, b = get_equation(triangle.vertices[A], triangle.vertices[B])
 
-  for area in range(2, round(fabs(triangle.area) - 2), step):
-    height = 2*area/triangle.vertices[1].x
+  for area in range(2, round((fabs(triangle.area) - 2)*(1/step))):
+    height = 2*area*step/triangle.vertices[1].x
 
     if a == zoo: # Vertical line (zoo = infinity)
       if height > triangle.vertices[B].y: # Impossible triangle somehow
@@ -102,8 +102,9 @@ def check_not_solution(solutions: List[SolutionTriangle], area_min: int = 1, are
 if __name__ == "__main__":
   start = time()
 
-  triangles = generate_triangles(area_max=30, step=1/2)
+  triangles = generate_triangles(area_max=3, step=1/2)
   solutions: List[SolutionTriangle] = []
+  raw: List[SolutionTriangle] = []
   
   for triangle in triangles:
     first_cut = cut(triangle, 0, 2, step=1/2)
@@ -117,6 +118,10 @@ if __name__ == "__main__":
         third = sg.Triangle(triangle.vertices[0], triangle.vertices[1], crossing)
         if third.area.is_integer and third.area != 0:
           solutions.append(SolutionTriangle(triangle, first, second, third))
+        raw.append(SolutionTriangle(triangle, first, second, third))
+    if not len(first_cut) or not len(second_cut):
+      raw.append(SolutionTriangle(triangle, None, None, None))
+        
   
   not_solution = check_not_solution(solutions, area_max=30)
 
@@ -125,6 +130,10 @@ if __name__ == "__main__":
   f = open("solutions.txt", "w")
   for solution in solutions:
     f.write(f"Triangle : {solution.triangle} {solution.triangle.area}\nPremier découpage : {solution.first}\nDeuxième découpage : {solution.second}\nTroisième découpage : {solution.third}\n\n")
+  f.close()
+  f = open("raw.txt", "w")
+  for r in raw:
+    f.write(f"Triangle : {r.triangle} {r.triangle.area}\nPremier découpage : {r.first}\nDeuxième découpage : {r.second}\nTroisième découpage : {r.third}\n\n")
   f.close()
   f = open("solutions.csv", "w")
   f.write("Aire, Base, Hauteur, Abscisse de la hauteur, Abscisse du point de premier découpage, Ordonnée du point de premier découpage, Abscisse du point de deuxième découpage, Ordonnée du point de deuxième découpage, Abscisse du point de troisième découpage, Ordonnée du point de troisième découpage\n")
