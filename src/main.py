@@ -35,14 +35,14 @@ class SolutionTriangle:
     self.first = first
     self.second = second
 
-def generate_triangles(area_min: int = 1, area_max: int = 30) -> List[sg.Triangle]:
+def generate_triangles(area_min: int = 1, area_max: int = 30, step: int = 1) -> List[sg.Triangle]:
   """
   Create all the triangles with an area between area_min and area_max and with integer base and height
   """
   triangles = []
   for areas in range(area_min, area_max+1):
-    bases = [2*areas/i for i in range(1, areas*2+1)]
-    for i in range(len(bases)-1, 0, -1):
+    bases = [2*areas/i for i in range(1, areas*2+1, step)]
+    for i in range(len(bases)-1, 0, -step):
       if not bases[i].is_integer():
         bases.pop(i)
     heights = bases.copy()
@@ -51,7 +51,7 @@ def generate_triangles(area_min: int = 1, area_max: int = 30) -> List[sg.Triangl
     for index, base in enumerate(bases):
       if index >= ceil(len(bases)/2):
         continue
-      for jndex in range(ceil(base/2) + 1):
+      for jndex in range(0, ceil(base/2) + 1, step):
         triangles.append(sg.Triangle(sg.Point(0, 0), sg.Point(base, 0), sg.Point(jndex, heights[index])))
   print(f"{len(triangles)} triangles générés")
   return triangles
@@ -65,7 +65,7 @@ def get_equation(first: sg.Point2D, second: sg.Point2D) -> Tuple[int, int]:
   b = first.y - a * first.x
   return a, b
 
-def cut(triangle: sg.Triangle, A: int = 0, B: int = 2) -> List[sg.Triangle]:
+def cut(triangle: sg.Triangle, A: int = 0, B: int = 2, step: int = 1) -> List[sg.Triangle]:
   """
   Cut a triangle in two
   """
@@ -76,7 +76,7 @@ def cut(triangle: sg.Triangle, A: int = 0, B: int = 2) -> List[sg.Triangle]:
   triangles = []
   a, b = get_equation(triangle.vertices[A], triangle.vertices[B])
 
-  for area in range(2, round(fabs(triangle.area) - 2)):
+  for area in range(2, round(fabs(triangle.area) - 2), step):
     height = 2*area/triangle.vertices[1].x
 
     if a == zoo: # Vertical line (zoo = infinity)
@@ -91,12 +91,12 @@ def cut(triangle: sg.Triangle, A: int = 0, B: int = 2) -> List[sg.Triangle]:
 if __name__ == "__main__":
   start = time()
 
-  triangles = generate_triangles(area_max=20)
-  solutions = []
+  triangles = generate_triangles(area_max=30, step=1/2)
+  solutions: List[SolutionTriangle] = []
   
   for triangle in triangles:
-    first_cut = cut(triangle, 0, 2)
-    second_cut = cut(triangle, 1, 2)
+    first_cut = cut(triangle, 0, 2, step=1/2)
+    second_cut = cut(triangle, 1, 2, step=1/2)
   
     for first in first_cut:
       for second in second_cut:
@@ -105,7 +105,7 @@ if __name__ == "__main__":
   
         third = sg.Triangle(triangle.vertices[0], triangle.vertices[1], crossing)
         if third.area.is_integer and third.area != 0:
-          solutions.append(SolutionTriangle(triangle, first, second))
+          solutions.append(SolutionTriangle(triangle, first, second, third))
   
   print(f"{len(solutions)} solutions trouvées")
   print(f"Temps d'éxecution : {time() - start}s")
