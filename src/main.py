@@ -90,17 +90,21 @@ def cut(triangle: sg.Triangle, A: int = 0, B: int = 2) -> List[sg.Triangle]:
 
 if __name__ == "__main__":
   start = time()
+
   triangles = generate_triangles(area_max=20)
   solutions = []
+  
   for triangle in triangles:
     first_cut = cut(triangle, 0, 2)
     second_cut = cut(triangle, 1, 2)
+  
     for first in first_cut:
       for second in second_cut:
         crossing = first.intersection(second)
         crossing: sg.Point2D = [i for i in crossing if i.is_Point][0]
+  
         third = sg.Triangle(triangle.vertices[0], triangle.vertices[1], crossing)
-        if third.area.is_integer and third.area > 0:
+        if third.area.is_integer and third.area != 0:
           solutions.append(SolutionTriangle(triangle, first, second))
   
   print(f"{len(solutions)} solutions trouvées")
