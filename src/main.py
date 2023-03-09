@@ -30,10 +30,11 @@ from sympy import zoo
 import sympy.geometry as sg
 
 class SolutionTriangle:
-  def __init__(self, triangle: sg.Triangle, first: sg.Triangle, second: sg.Triangle) -> None:
+  def __init__(self, triangle: sg.Triangle, first: sg.Triangle, second: sg.Triangle, third: sg.Triangle) -> None:
     self.triangle = triangle
     self.first = first
     self.second = second
+    self.third = third
 
 def generate_triangles(area_min: int = 1, area_max: int = 30, step: int = 1) -> List[sg.Triangle]:
   """
@@ -123,7 +124,12 @@ if __name__ == "__main__":
   print(f"Temps d'éxecution : {time() - start}s")
   f = open("solutions.txt", "w")
   for solution in solutions:
-    f.write(f"Triangle : {solution.triangle}\nPremier découpage : {solution.first}\nDeuxième découpage : {solution.second}\n\n")
+    f.write(f"Triangle : {solution.triangle} {solution.triangle.area}\nPremier découpage : {solution.first}\nDeuxième découpage : {solution.second}\nTroisième découpage : {solution.third}\n\n")
+  f.close()
+  f = open("solutions.csv", "w")
+  f.write("Aire, Base, Hauteur, Abscisse de la hauteur, Abscisse du point de premier découpage, Ordonnée du point de premier découpage, Abscisse du point de deuxième découpage, Ordonnée du point de deuxième découpage, Abscisse du point de troisième découpage, Ordonnée du point de troisième découpage\n")
+  for solution in solutions:
+    f.write(f"{solution.triangle.area}, {solution.triangle.vertices[1].x}, {solution.triangle.vertices[2].y}, {solution.triangle.vertices[2].x}, {solution.first.vertices[2].x}, {solution.first.vertices[2].y}, {solution.second.vertices[2].x}, {solution.second.vertices[2].y}, {solution.third.vertices[2].x}, {solution.third.vertices[2].y}\n")
   f.close()
   f = open("not_solution.txt", "w")
   for area in not_solution:
