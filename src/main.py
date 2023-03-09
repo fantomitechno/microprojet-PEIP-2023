@@ -102,7 +102,7 @@ def check_not_solution(solutions: List[SolutionTriangle], area_min: int = 1, are
 if __name__ == "__main__":
   start = time()
 
-  triangles = generate_triangles(area_max=3, step=1/2)
+  triangles = generate_triangles(area_max=30, step=1/2)
   solutions: List[SolutionTriangle] = []
   raw: List[SolutionTriangle] = []
   
