@@ -170,7 +170,7 @@ if __name__ == "__main__":
     solutionsCSV.close()
     raw.close()
 
-    solutions = open("solutionsCSV.txt", "r").read().split("\n")
+    solutions = open("solutions.csv", "r").read().split("\n")
     not_solution = check_not_solution(solutions, area_max=30)
 
     print(f"{len(solutions - 1)} solutions trouvées")
