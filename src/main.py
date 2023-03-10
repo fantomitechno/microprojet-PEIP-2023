@@ -21,10 +21,11 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-from requests import post
 from typing import AbstractSet, Tuple
 from time import time
 from math import ceil, fabs
+from tqdm import tqdm
+from multiprocessing import Pool
 from sympy import zoo
 
 import sympy.geometry as sg
@@ -41,7 +42,7 @@ def generate_triangles(area_min: int = 1, area_max: int = 30, step: int = 1) -> 
   Create all the triangles with an area between area_min and area_max and with integer base and height
   """
   triangles = set()
-  for areas in range(area_min, area_max+1):
+  for areas in tqdm(range(area_min, area_max+1)):
     bases = [2*areas/i for i in range(1, areas*2+1)]
     for i in range(len(bases)-1, 0, -1):
       if not bases[i].is_integer():
@@ -89,13 +90,13 @@ def cut(triangle: sg.Triangle, A: int = 0, B: int = 2, step: int = 1) -> Abstrac
     triangles.add(sg.Triangle(triangle.vertices[0], triangle.vertices[1], sg.Point(x, height)))
   return triangles
 
-def check_not_solution(solutions: AbstractSet[SolutionTriangle], area_min: int = 1, area_max: int = 30) -> AbstractSet[int]:
+def check_not_solution(solutions: str, area_min: int = 1, area_max: int = 30) -> AbstractSet[int]:
   """
   Check for no solutions
   """
   not_solution = set()
   for area in range(area_min, area_max+1):
-    if not any([solution.triangle.area == area for solution in solutions]):
+    if any([solution.startswith(str(area)) for solution in solutions]):
       not_solution.add(area)
   return not_solution
 
@@ -103,12 +104,14 @@ if __name__ == "__main__":
   start = time()
 
   triangles = generate_triangles(step=1/2)
-  solutions: AbstractSet[SolutionTriangle] = set()
-  raw: AbstractSet[SolutionTriangle] = set()
+  solutions = open("solutions.txt", "w")
+  solutionsCSV = open("solutions.csv", "w")
+  solutionsCSV.write("Aire, Base, Hauteur, Abscisse de la hauteur, Abscisse du point de premier découpage, Ordonnée du point de premier découpage, Abscisse du point de deuxième découpage, Ordonnée du point de deuxième découpage, Abscisse du point de troisième découpage, Ordonnée du point de troisième découpage\n")
+  raw = open("raw.txt", "w") 
   
-  for triangle in triangles:
+  for triangle in tqdm(triangles):
     first_cut = cut(triangle, 0, 2, step=1/2)
-    second_cut = cut(triangle, 1, 2, step=1/2)
+    second_cut = cut(triangle, 1, 2, step=1/2) 
   
     for first in first_cut:
       for second in second_cut:
@@ -117,29 +120,21 @@ if __name__ == "__main__":
   
         third = sg.Triangle(triangle.vertices[0], triangle.vertices[1], crossing)
         if third.area.is_integer and third.area != 0:
-          solutions.add(SolutionTriangle(triangle, first, second, third))
-        raw.add(SolutionTriangle(triangle, first, second, third))
+          solutions.write(f"Triangle : {triangle} {triangle.area}\nPremier découpage : {first}\nDeuxième découpage : {second}\nTroisième découpage : {third}\n\n")
+          solutionsCSV.write(f"{triangle.area}, {triangle.vertices[1].x}, {triangle.vertices[2].y}, {triangle.vertices[2].x}, {first.vertices[2].x}, {first.vertices[2].y}, {second.vertices[2].x}, {second.vertices[2].y}, {third.vertices[2].x}, {third.vertices[2].y}\n")
+        raw.write(f"Triangle : {triangle} {triangle.area}\nPremier découpage : {first}\nDeuxième découpage : {second}\nTroisième découpage : {third}\n\n")
     if not len(first_cut) or not len(second_cut):
-      raw.add(SolutionTriangle(triangle, None, None, None))
-        
+      raw.write(f"Triangle : {triangle} {triangle.area}\nPremier découpage : None\nDeuxième découpage : None\nTroisième découpage : None\n\n")
   
+  solutions.close()
+  solutionsCSV.close()
+  raw.close()
+
+  solutions = open("solutionsCSV.txt", "r").read().split("\n")
   not_solution = check_not_solution(solutions, area_max=30)
 
-  print(f"{len(solutions)} solutions trouvées")
+  print(f"{len(solutions - 1)} solutions trouvées")
   print(f"Temps d'éxecution : {time() - start}s")
-  f = open("solutions.txt", "w")
-  for solution in solutions:
-    f.write(f"Triangle : {solution.triangle} {solution.triangle.area}\nPremier découpage : {solution.first}\nDeuxième découpage : {solution.second}\nTroisième découpage : {solution.third}\n\n")
-  f.close()
-  f = open("raw.txt", "w")
-  for r in raw:
-    f.write(f"Triangle : {r.triangle} {r.triangle.area}\nPremier découpage : {r.first}\nDeuxième découpage : {r.second}\nTroisième découpage : {r.third}\n\n")
-  f.close()
-  f = open("solutions.csv", "w")
-  f.write("Aire, Base, Hauteur, Abscisse de la hauteur, Abscisse du point de premier découpage, Ordonnée du point de premier découpage, Abscisse du point de deuxième découpage, Ordonnée du point de deuxième découpage, Abscisse du point de troisième découpage, Ordonnée du point de troisième découpage\n")
-  for solution in solutions:
-    f.write(f"{solution.triangle.area}, {solution.triangle.vertices[1].x}, {solution.triangle.vertices[2].y}, {solution.triangle.vertices[2].x}, {solution.first.vertices[2].x}, {solution.first.vertices[2].y}, {solution.second.vertices[2].x}, {solution.second.vertices[2].y}, {solution.third.vertices[2].x}, {solution.third.vertices[2].y}\n")
-  f.close()
   f = open("not_solution.txt", "w")
   for area in not_solution:
     f.write(f"{area}, ")
