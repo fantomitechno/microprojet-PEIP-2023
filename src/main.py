@@ -173,7 +173,7 @@ if __name__ == "__main__":
     solutions = open("solutions.csv", "r").read().split("\n")
     not_solution = check_not_solution(solutions, area_max=30)
 
-    print(f"{len(solutions - 1)} solutions trouvées")
+    print(f"{len(solutions) - 1} solutions trouvées")
     print(f"Temps d'éxecution : {time() - start}s")
     f = open("not_solution.txt", "w")
     for area in not_solution:
