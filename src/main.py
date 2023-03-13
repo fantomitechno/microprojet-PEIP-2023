@@ -142,7 +142,7 @@ def run(triangle: sg.Triangle):
                     f"Triangle : {triangle} {triangle.area}\nPremier découpage : {first}\nDeuxième découpage : {second}\nTroisième découpage : {third}\n\n"
                 )
                 solutionsCSV.write(
-                    f"{triangle.area}, {triangle.vertices[1].x}, {triangle.vertices[2].y}, {triangle.vertices[2].x}, {first.vertices[2].x}, {first.vertices[2].y}, {second.vertices[2].x}, {second.vertices[2].y}, {third.vertices[2].x}, {third.vertices[2].y}\n"
+                    f"{triangle.area},={triangle.vertices[1].x},={triangle.vertices[2].y},={triangle.vertices[2].x},={first.vertices[2].x},={first.vertices[2].y},={second.vertices[2].x},={second.vertices[2].y},={third.vertices[2].x},={third.vertices[2].y}\n"
                 )
                 raw.write(
                     f"Triangle : {triangle} {triangle.area}\nPremier découpage : {first}\nDeuxième découpage : {second}\nTroisième découpage : {third}\n\n"
@@ -175,7 +175,6 @@ if __name__ == "__main__":
 
     print(f"{len(solutions) - 1} solutions trouvées")
     print(f"Temps d'éxecution : {time() - start}s")
-    f = open("not_solution.txt", "w")
-    for area in not_solution:
-        f.write(f"{area}, ")
-    f.close()
+    from no_solution import run_check
+
+    run_check()
