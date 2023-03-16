@@ -62,7 +62,9 @@ def generate_triangles(
         heights.reverse()
         # The initialisation could probably be much better
         for index, base in enumerate(bases):
-            for jndex in range(0, round((ceil(base / 2) * (1 / step) + 1))):
+            for jndex in range(
+                -round(base * (1 / step)), round((ceil(base / 2) * (1 / step) + 1))
+            ):
                 triangles.add(
                     sg.Triangle(
                         sg.Point(0, 0),
