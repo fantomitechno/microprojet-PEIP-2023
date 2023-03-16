@@ -87,7 +87,7 @@ def get_equation(first: sg.Point2D, second: sg.Point2D) -> Tuple[int, int]:
 
 
 def cut(
-    triangle: sg.Triangle, A: int = 0, B: int = 2, step: float = 1
+    triangle: sg.Triangle, A: int = 0, B: int = 2
 ) -> Set[sg.Triangle]:
     """
     Cut a triangle in two
@@ -99,8 +99,8 @@ def cut(
     triangles = set()
     a, b = get_equation(triangle.vertices[A], triangle.vertices[B])
 
-    for area in range(2, round((fabs(triangle.area) - 2) * (1 / step))):
-        height = 2 * area * step / triangle.vertices[1].x
+    for area in range(2, (fabs(triangle.area) - 2)):
+        height = 2 * area / triangle.vertices[1].x
 
         if a == zoo:  # Vertical line (zoo = infinity)
             if height > triangle.vertices[B].y:  # Impossible triangle somehow
@@ -119,8 +119,8 @@ def run(triangles: Tuple[Set[sg.Triangle], int]):
     solutionsCSV = open("solutions-" + str(triangles[1]) + ".csv", "w")
     raw = open("raw-" + str(triangles[1]) + ".txt", "w")
     for triangle in triangles[0]:
-        first_cut = cut(triangle, 0, 2, step=1 / 2)
-        second_cut = cut(triangle, 1, 2, step=1 / 2)
+        first_cut = cut(triangle, 0, 2)
+        second_cut = cut(triangle, 1, 2)
         for first in first_cut:
             for second in second_cut:
                 crossing = first.intersection(second)
