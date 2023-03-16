@@ -86,9 +86,7 @@ def get_equation(first: sg.Point2D, second: sg.Point2D) -> Tuple[int, int]:
     return a, b
 
 
-def cut(
-    triangle: sg.Triangle, A: int = 0, B: int = 2
-) -> Set[sg.Triangle]:
+def cut(triangle: sg.Triangle, A: int = 0, B: int = 2) -> Set[sg.Triangle]:
     """
     Cut a triangle in two
     """
@@ -99,7 +97,7 @@ def cut(
     triangles = set()
     a, b = get_equation(triangle.vertices[A], triangle.vertices[B])
 
-    for area in range(2, (fabs(triangle.area) - 2)):
+    for area in range(2, round(fabs(triangle.area) - 2)):
         height = 2 * area / triangle.vertices[1].x
 
         if a == zoo:  # Vertical line (zoo = infinity)
