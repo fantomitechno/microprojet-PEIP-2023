@@ -152,7 +152,7 @@ def run(triangles: Tuple[Set[sg.Triangle], int]):
 
 if __name__ == "__main__":
     start = time()
-    triangles = generate_triangles(step=1 / 2, area_max=6)
+    triangles = generate_triangles(step=1 / 2)
 
     n = len(triangles)
     triangles = [
