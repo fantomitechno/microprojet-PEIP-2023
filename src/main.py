@@ -53,8 +53,8 @@ def generate_triangles(
     Create all the triangles with an area between area_min and area_max and with integer base and height
     """
     triangles = set()
-    for areas in tqdm(range(area_min, area_max + 1)):
-        bases = [2 * areas / i for i in range(1, areas * 2 + 1)]
+    for area in tqdm(range(area_min, area_max + 1)):
+        bases = [2 * area / i for i in range(1, area * 2 + 1)]
         for i in range(len(bases) - 1, 0, -1):
             if not bases[i].is_integer():
                 bases.pop(i)
