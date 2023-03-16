@@ -1,7 +1,7 @@
 """
 MIT License
 
-Copyright (c) 2023 Simon - fantomitechno 
+Copyright (c) 2023 Simon - fantomitechno
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -26,7 +26,7 @@ from time import time
 from math import ceil, fabs
 from tqdm import tqdm
 from multiprocessing import Pool
-from os import getpid
+from os import remove
 from sympy import zoo
 
 import sympy.geometry as sg
@@ -47,7 +47,7 @@ class SolutionTriangle:
 
 
 def generate_triangles(
-    area_min: int = 1, area_max: int = 30, step: int = 1
+    area_min: int = 1, area_max: int = 30, step: float = 1
 ) -> Set[sg.Triangle]:
     """
     Create all the triangles with an area between area_min and area_max and with integer base and height
@@ -62,8 +62,6 @@ def generate_triangles(
         heights.reverse()
         # The initialisation could probably be much better
         for index, base in enumerate(bases):
-            if index >= ceil(len(bases) / 2):
-                continue
             for jndex in range(0, round((ceil(base / 2) * (1 / step) + 1))):
                 triangles.add(
                     sg.Triangle(
@@ -87,7 +85,7 @@ def get_equation(first: sg.Point2D, second: sg.Point2D) -> Tuple[int, int]:
 
 
 def cut(
-    triangle: sg.Triangle, A: int = 0, B: int = 2, step: int = 1
+    triangle: sg.Triangle, A: int = 0, B: int = 2, step: float = 1
 ) -> Set[sg.Triangle]:
     """
     Cut a triangle in two
@@ -108,72 +106,85 @@ def cut(
             x = triangle.vertices[B].x
         else:
             x = (height - b) / a
-            triangles.add(
-                sg.Triangle(
-                    triangle.vertices[0], triangle.vertices[1], sg.Point(x, height)
-                )
-            )
+        triangles.add(
+            sg.Triangle(triangle.vertices[0], triangle.vertices[1], sg.Point(x, height))
+        )
     return triangles
 
 
-def check_not_solution(
-    solutions: str, area_min: int = 1, area_max: int = 30
-) -> Set[int]:
-    """
-    Check for no solutions
-    """
-    not_solution = set()
-    for area in range(area_min, area_max + 1):
-        if any([solution.startswith(str(area)) for solution in solutions]):
-            not_solution.add(area)
-    return not_solution
-
-
-def run(triangle: sg.Triangle):
-    first_cut = cut(triangle, 0, 2, step=1 / 2)
-    second_cut = cut(triangle, 1, 2, step=1 / 2)
-    for first in first_cut:
-        for second in second_cut:
-            crossing = first.intersection(second)
-            crossing: sg.Point2D = [i for i in crossing if i.is_Point][0]
-            third = sg.Triangle(triangle.vertices[0], triangle.vertices[1], crossing)
-            if third.area.is_integer and third.area != 0:
-                solutions.write(
-                    f"Triangle : {triangle} {triangle.area}\nPremier découpage : {first}\nDeuxième découpage : {second}\nTroisième découpage : {third}\n\n"
+def run(triangles: Tuple[Set[sg.Triangle], int]):
+    solutions = open("solutions-" + str(triangles[1]) + ".txt", "w")
+    solutionsCSV = open("solutions-" + str(triangles[1]) + ".csv", "w")
+    raw = open("raw-" + str(triangles[1]) + ".txt", "w")
+    for triangle in triangles[0]:
+        first_cut = cut(triangle, 0, 2, step=1 / 2)
+        second_cut = cut(triangle, 1, 2, step=1 / 2)
+        for first in first_cut:
+            for second in second_cut:
+                crossing = first.intersection(second)
+                crossing: sg.Point2D = [i for i in crossing if i.is_Point][0]
+                third = sg.Triangle(
+                    triangle.vertices[0], triangle.vertices[1], crossing
                 )
-                solutionsCSV.write(
-                    f"{triangle.area},={triangle.vertices[1].x},={triangle.vertices[2].y},={triangle.vertices[2].x},={first.vertices[2].x},={first.vertices[2].y},={second.vertices[2].x},={second.vertices[2].y},={third.vertices[2].x},={third.vertices[2].y}\n"
-                )
-                raw.write(
-                    f"Triangle : {triangle} {triangle.area}\nPremier découpage : {first}\nDeuxième découpage : {second}\nTroisième découpage : {third}\n\n"
-                )
+                if third.area.is_integer and third.area != 0:
+                    solutions.write(
+                        f"Triangle : {triangle} {triangle.area}\nPremier découpage : {first}\nDeuxième découpage : {second}\nTroisième découpage : {third}\n\n"
+                    )
+                    solutionsCSV.write(
+                        f"{triangle.area},={triangle.vertices[1].x},={triangle.vertices[2].y},={triangle.vertices[2].x},={first.vertices[2].x},"
+                        + f"={first.vertices[2].y},={first.area},={second.vertices[2].x},={second.vertices[2].y},={second.area},={third.vertices[2].x},"
+                        + f"={third.vertices[2].y},={third.area},={first.area-third.area},={second.area-third.area},"
+                        + f"={triangle.area - (first.area + second.area - third.area)}\n"
+                    )
+                    raw.write(
+                        f"Triangle : {triangle} {triangle.area}\nPremier découpage : {first}\nDeuxième découpage : {second}\nTroisième découpage : {third}\n\n"
+                    )
         if not len(first_cut) or not len(second_cut):
             raw.write(
                 f"Triangle : {triangle} {triangle.area}\nPremier découpage : None\nDeuxième découpage : None\nTroisième découpage : None\n\n"
             )
-
-
-if __name__ == "__main__":
-    start = time()
-    triangles = generate_triangles(step=1 / 2)
-    solutions = open("solutions.txt", "w")
-    solutionsCSV = open("solutions.csv", "w")
-    solutionsCSV.write(
-        "Aire, Base, Hauteur, Abscisse de la hauteur, Abscisse du point de premier découpage, Ordonnée du point de premier découpage, Abscisse du point de deuxième découpage, Ordonnée du point de deuxième découpage, Abscisse du point de troisième découpage, Ordonnée du point de troisième découpage\n"
-    )
-    raw = open("raw.txt", "w")
-
-    with Pool(10) as p:
-        p.map(run, tqdm(triangles))
-
     solutions.close()
     solutionsCSV.close()
     raw.close()
 
-    solutions = open("solutions.csv", "r").read().split("\n")
-    not_solution = check_not_solution(solutions, area_max=30)
 
-    print(f"{len(solutions) - 1} solutions trouvées")
+if __name__ == "__main__":
+    start = time()
+    triangles = generate_triangles(step=1 / 2, area_max=6)
+
+    n = len(triangles)
+    triangles = [
+        (set(list(triangles)[i * n // 10 : (i + 1) * n // 10]), i) for i in range(10)
+    ]
+    print(triangles)
+
+    with Pool(10) as p:
+        p.map(run, triangles)
+
+    solutionsCSV = open("solutions.csv", "w")
+    solutionsCSV.write(
+        "Aire, Base, Hauteur, Abscisse de la hauteur, Abscisse du point de premier découpage, "
+        + "Ordonnée du point de premier découpage, Aire du premier découpage, Abscisse du point de deuxième découpage, "
+        + "Ordonnée du point de deuxième découpage, Aire du deuxième découpage, Abscisse du croisement, Ordonnée du croisement, "
+        + "Aire du triangle sous le croisement, Aire du triangle à gauche du croisement, Aire du triangle à droite du croisement, "
+        + "Aire du quadrilatère au dessus du croisement\n"
+    )
+    solutions = open("solutions.txt", "w")
+    raw = open("raw.txt", "w")
+    for i in range(10):
+        solutionsCSV.write(open("solutions-" + str(i) + ".csv", "r").read())
+        remove("solutions-" + str(i) + ".csv")
+        raw.write(open("raw-" + str(i) + ".txt", "r").read())
+        remove("raw-" + str(i) + ".txt")
+        solutions.write(open("solutions-" + str(i) + ".txt", "r").read())
+        remove("solutions-" + str(i) + ".txt")
+    solutionsCSV.close()
+    raw.close()
+    solutions.close()
+
+    solutions = len(open("solutions.csv", "r").read().splitlines()) - 1
+
+    print(f"{solutions} solutions trouvées")
     print(f"Temps d'éxecution : {time() - start}s")
     from no_solution import run_check
 
