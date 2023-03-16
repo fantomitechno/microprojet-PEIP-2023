@@ -156,7 +156,6 @@ if __name__ == "__main__":
     triangles = [
         (set(list(triangles)[i * n // 10 : (i + 1) * n // 10]), i) for i in range(10)
     ]
-    print(triangles)
 
     with Pool(10) as p:
         p.map(run, triangles)
