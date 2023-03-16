@@ -25,7 +25,7 @@ from typing import List
 
 
 def check_has_no_solution(
-    solutions: str, area_min: int = 1, area_max: int = 30
+    solutions: List[str], area_min: int = 1, area_max: int = 30
 ) -> List[int]:
     """
     Check for no solutions
@@ -38,7 +38,7 @@ def check_has_no_solution(
 
 
 def check_has_solution(
-    solutions: str, area_min: int = 1, area_max: int = 30
+    solutions: List[str], area_min: int = 1, area_max: int = 30
 ) -> List[int]:
     """
     Check for solutions
